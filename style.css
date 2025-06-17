@@ -1,0 +1,65 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5; /* Light gray background */
+    color: #333;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+}
+
+.upload-area {
+    border: 2px dashed #ccd0d5; /* Light gray dashed border */
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    background-color: #ffffff; /* White background */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.upload-area:hover {
+    border-color: #a7abb0; /* Slightly darker on hover */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12); /* More prominent shadow on hover */
+}
+
+.upload-area.highlight {
+    border-color: #007bff; /* Blue border when dragging over */
+    background-color: #e0f0ff; /* Light blue background when dragging over */
+}
+
+.upload-area input[type="file"] {
+    display: none; /* Hide the default file input */
+}
+
+.upload-area p {
+    margin: 10px 0;
+    font-size: 1.1em;
+    color: #555;
+}
+
+.upload-area p span {
+    color: #007bff; /* Blue for "Click to Browse" */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.file-name {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #666;
+    word-wrap: break-word; /* Ensure long file names wrap */
+}
