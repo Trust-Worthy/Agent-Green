@@ -25,15 +25,6 @@
             <!-- Tab 1: Carbon Dashboard -->
             <div id="dashboardContent" class="tab-content active">
                 <section class="controls">
-                    <div class="input-group" style="margin-bottom: 20px; align-items: center;">
-                         <label for="modelSelector" style="margin-bottom: 8px; font-weight: 600;">Select AI Model:</label>
-                         <select id="modelSelector" style="padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 1em; min-width: 250px;">
-                             <option value="gpt-4o-2024-05-13" selected>GPT-4o</option>
-                             <option value="gpt-3.5-turbo">GPT-3.5-Turbo</option>
-                             <option value="mixtral-8x7b-instruct-v0.1">Mixtral-8x7B</option>
-                             <option value="llama-3-8b-instruct">LLaMA-3-8B</option>
-                         </select>
-                    </div>
                     <button id="runSimulationBtn">Run Carbon Footprint Simulation</button>
                     <div class="loader" id="loader"></div>
                 </section>
@@ -56,9 +47,11 @@
                 <section class="charts-section">
                     <h2>Step-by-Step Breakdown</h2>
                     <div class="chart-container">
+                        <h3>Carbon Emissions per Step</h3>
                         <canvas id="carbonChart"></canvas>
                     </div>
                     <div class="chart-container">
+                        <h3>Energy Breakdown per Step (kWh)</h3>
                         <canvas id="energyChart"></canvas>
                     </div>
                 </section>
