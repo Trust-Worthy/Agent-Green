@@ -60,11 +60,12 @@ def make_llm_call_and_estimate_energy(model_name, prompt_content):
         print(f"      An unexpected error occurred during LLM call: {e}")
         return 0, 0, f"Error: {e}"
 
-
 def simulate_local_processing(complexity, description="processing"):
     """Simulates agent's internal thought process or data manipulation."""
     start_time = time.time()
-    _ = np.random.rand(complexity, 10).dot(np.random.rand(10, 1)) # Dummy heavy computation
+    # FIX: Convert complexity to an integer
+    effective_complexity = int(complexity) 
+    _ = np.random.rand(effective_complexity, 10).dot(np.random.rand(10, 1)) # Dummy heavy computation
     time.sleep(0.05) # Simulate some minor real time
     end_time = time.time()
     print(f"    - Simulated local {description}: {end_time - start_time:.2f}s")

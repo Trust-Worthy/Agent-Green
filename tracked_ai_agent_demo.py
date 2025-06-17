@@ -27,11 +27,16 @@ def simulate_llm_call(model_name, prompt_tokens, completion_tokens):
     print(f"    - Simulated LLM Call ({model_name}): {total_tokens} tokens. Est. Energy: {estimated_joules:.2f}J")
     return estimated_joules
 
-def simulate_local_processing(complexity):
+def simulate_local_processing(complexity, description="processing"):
     """Simulates agent's internal thought process or data manipulation."""
-    _ = np.random.rand(complexity, 10).dot(np.random.rand(10, 1)) # Dummy heavy computation
-    time.sleep(0.1) # Simulate some minor real time
-
+    start_time = time.time()
+    # FIX: Convert complexity to an integer
+    effective_complexity = int(complexity) 
+    _ = np.random.rand(effective_complexity, 10).dot(np.random.rand(10, 1)) # Dummy heavy computation
+    time.sleep(0.05) # Simulate some minor real time
+    end_time = time.time()
+    print(f"    - Simulated local {description}: {end_time - start_time:.2f}s")
+    
 def simulate_tool_use(tool_name):
     """Simulates calling an external tool."""
     print(f"    - Agent using tool: {tool_name}")

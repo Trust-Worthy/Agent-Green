@@ -290,3 +290,5 @@ class EnergyTracker:
         if self._poll_thread and self._poll_thread.is_alive():
             self._thread_stop_event.set()
             self._poll_thread.join(timeout=1) # Give it a moment to stop
+
+
