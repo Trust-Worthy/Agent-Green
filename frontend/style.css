@@ -1,0 +1,220 @@
+/* General Body and Container Styling for Minimalist Look */
+body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; /* Modern, clean font */
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    background-color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Subtle shadow for depth */
+    border-radius: 12px; /* Slightly rounded corners */
+    margin: 30px 0;
+    padding: 30px;
+    display: grid;
+    gap: 30px; /* Space between sections */
+    grid-template-columns: 1fr; /* Single column layout for responsiveness */
+}
+
+/* Header Styling */
+header {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+header h1 {
+    color: #2c3e50; /* Darker blue/grey for headings */
+    margin-bottom: 10px;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+header p {
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Controls Section */
+.controls {
+    text-align: center;
+    padding: 20px 0;
+}
+
+button {
+    background-color: #4CAF50; /* Green call to action */
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4CAF50;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+    display: none; /* Hidden by default */
+    margin: 15px auto 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Summary Cards Section */
+.summary-cards {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap; /* Allow cards to wrap on smaller screens */
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.card {
+    background-color: #fdfdfd;
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    flex: 1; /* Allow cards to grow and shrink */
+    min-width: 280px; /* Minimum width before wrapping */
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    color: #4CAF50; /* Highlight important numbers */
+    margin-bottom: 10px;
+    font-size: 1.3em;
+}
+
+.card p {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.card p span {
+    font-size: 1em; /* Keep number size consistent */
+}
+
+/* Charts Section */
+.charts-section {
+    padding: 20px 0;
+}
+
+.charts-section h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+.chart-container {
+    background-color: #fdfdfd;
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+/* LLM Analysis & Detailed Report Sections */
+.llm-analysis, .detailed-report {
+    padding: 20px 0;
+}
+
+.llm-analysis h2, .detailed-report h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+#llmAnalysisContent, #detailedReportContent {
+    text-align: left; /* Override card text-align for pre-formatted text */
+    white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+    word-wrap: break-word; /* Break long words if necessary */
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace; /* Monospaced font for code/report */
+    font-size: 0.95em;
+    background-color: #f8f9fa; /* Slightly darker background for pre */
+    border: 1px solid #e0e2e5;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-x: auto; /* Enable horizontal scrolling for wide lines */
+}
+
+/* Footer Styling */
+footer {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #888;
+    font-size: 0.9em;
+    margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    button {
+        padding: 12px 25px;
+        font-size: 1em;
+    }
+
+    .summary-cards {
+        flex-direction: column; /* Stack cards vertically on small screens */
+        align-items: center;
+    }
+
+    .card {
+        min-width: unset; /* Remove min-width to allow full width */
+        width: 100%;
+    }
+}

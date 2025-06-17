@@ -3,8 +3,10 @@ import time
 import os
 import random
 from energy_tracker import EnergyTracker
-import openai # New import
-from openai import OpenAI # New import for the client
+import openai
+from openai import OpenAI
+import matplotlib.pyplot as plt # Import matplotlib
+import pandas as pd # Optional, but good for data handling before plotting
 
 # --- Configuration ---
 NUM_AGENT_TURNS = 3 # Reduce turns for quicker demo with real API calls
@@ -63,8 +65,7 @@ def make_llm_call_and_estimate_energy(model_name, prompt_content):
 def simulate_local_processing(complexity, description="processing"):
     """Simulates agent's internal thought process or data manipulation."""
     start_time = time.time()
-    # FIX: Convert complexity to an integer
-    effective_complexity = int(complexity) 
+    effective_complexity = int(complexity)
     _ = np.random.rand(effective_complexity, 10).dot(np.random.rand(10, 1)) # Dummy heavy computation
     time.sleep(0.05) # Simulate some minor real time
     end_time = time.time()
@@ -127,35 +128,22 @@ def run_ai_agent_simulation_with_llm():
     time.sleep(0.2)
     tracker.end_step("agent_shutdown")
 
-    tracker.stop()
-    results = tracker.get_results()
-
-    print(f"\n--- AI Agent Carbon Footprint Report ({NUM_AGENT_TURNS} Turns) ---")
-    print(f"Total Duration: {results['total_duration_sec']:.2f} seconds")
-    print(f"Total Energy: {results['total_energy_kwh']:.6f} kWh")
-    print(f"Total Carbon Emissions: {results['total_carbon_gco2']:.4f} gCO2")
-    print("\n--- Detailed Step Report ---")
-    # Pretty print the results for clarity
-    for step, data in results["steps"].items():
-        print(f"\nStep: {step}")
-        print(f"  Duration: {data['duration']:.2f} s")
-        print(f"  CPU Energy (Measured): {data['cpu_energy_joules'] / 3.6e6:.6f} kWh")
-        if data['gpu_energy_joules'] > 0:
-            print(f"  GPU Energy (Measured): {data['gpu_energy_joules'] / 3.6e6:.6f} kWh")
-        if data.get('estimated_external_joules', 0) > 0: # Check using .get for robustness
-            print(f"  External Energy (Estimated): {data['estimated_external_joules'] / 3.6e6:.6f} kWh")
-            print(f"  External Carbon (Estimated): {data['estimated_external_gco2']:.4f} gCO2")
-        print(f"  Total Step Carbon Emissions: {data['carbon_emissions_gco2']:.4f} gCO2")
-    print("-" * 40)
-
-
     # --- New: LLM for Post-Analysis of the Report ---
     print("\n--- Asking LLM for Insights on the Energy Report ---")
+
+    # Temporarily get results *before* the final LLM analysis
+    # so we can feed them into the LLM prompt.
+    # This doesn't stop the tracker, just gets the current state.
+    intermediate_results = tracker.get_results()
+
     report_summary_for_llm = []
-    report_summary_for_llm.append(f"Overall Carbon Footprint: {results['total_carbon_gco2']:.4f} gCO2 over {results['total_duration_sec']:.2f} seconds.")
+    report_summary_for_llm.append(f"Overall Carbon Footprint: {intermediate_results['total_carbon_gco2']:.4f} gCO2 over {intermediate_results['total_duration_sec']:.2f} seconds.")
     report_summary_for_llm.append("Breakdown by step:")
-    for step, data in results["steps"].items():
+    for step, data in intermediate_results["steps"].items():
+        if step == "overall_external_costs" and data['estimated_external_joules'] == 0:
+            continue
         report_summary_for_llm.append(f"- {step}: Duration {data['duration']:.2f}s, CPU {data['cpu_energy_joules'] / 3.6e6:.6f} kWh, GPU {data['gpu_energy_joules'] / 3.6e6:.6f} kWh, External {data.get('estimated_external_joules', 0) / 3.6e6:.6f} kWh, Total Carbon {data['carbon_emissions_gco2']:.4f} gCO2.")
+
 
     llm_analysis_prompt = (
         "Analyze the following energy consumption report for an AI agent's execution. "
@@ -177,10 +165,106 @@ def run_ai_agent_simulation_with_llm():
     print("\n--- LLM's Insights & Suggestions ---")
     print(llm_analysis_response)
 
-    # Re-run stop to capture the final LLM analysis step
+    # --- Finalization and Reporting ---
+    # NOW, stop the tracker and get the FINAL results that include the LLM analysis step.
     tracker.stop()
     final_results = tracker.get_results()
-    print(f"\nFinal Total Carbon (including LLM Analysis): {final_results['total_carbon_gco2']:.4f} gCO2")
+
+    print(f"\n--- AI Agent Carbon Footprint Report (FINAL - {NUM_AGENT_TURNS} Turns) ---")
+    print(f"Total Duration: {final_results['total_duration_sec']:.2f} seconds")
+    print(f"Total Energy: {final_results['total_energy_kwh']:.6f} kWh")
+    print(f"Total Carbon Emissions: {final_results['total_carbon_gco2']:.4f} gCO2")
+    print("\n--- Detailed Step Report (FINAL) ---")
+    # Pretty print the final results for clarity
+    for step, data in final_results["steps"].items():
+        if step == "overall_external_costs" and data['estimated_external_joules'] == 0:
+            continue
+        print(f"\nStep: {step}")
+        print(f"  Duration: {data['duration']:.2f} s")
+        print(f"  CPU Energy (Measured): {data['cpu_energy_joules'] / 3.6e6:.6f} kWh")
+        if data['gpu_energy_joules'] > 0:
+            print(f"  GPU Energy (Measured): {data['gpu_energy_joules'] / 3.6e6:.6f} kWh")
+        if data.get('estimated_external_joules', 0) > 0:
+            print(f"  External Energy (Estimated): {data['estimated_external_joules'] / 3.6e6:.6f} kWh")
+            print(f"  External Carbon (Estimated): {data['estimated_external_gco2']:.4f} gCO2")
+        print(f"  Total Step Carbon Emissions: {data['carbon_emissions_gco2']:.4f} gCO2")
+    print("-" * 40)
+
+    # --- New: Data Visualization ---
+    print("\n--- Generating Carbon Footprint Graphs ---")
+
+    # Filter out empty steps or 'overall_external_costs' if it's just a bucket
+    plottable_steps = {
+        k: v for k, v in final_results["steps"].items()
+        if not (k == "overall_external_costs" and v['estimated_external_joules'] == 0)
+    }
+
+    step_names = list(plottable_steps.keys())
+    total_carbon_gco2 = [data['carbon_emissions_gco2'] for data in plottable_steps.values()]
+    cpu_joules = [data['cpu_energy_joules'] for data in plottable_steps.values()]
+    gpu_joules = [data['gpu_energy_joules'] for data in plottable_steps.values()]
+    external_joules = [data['estimated_external_joules'] for data in plottable_steps.values()]
+
+    # Convert Joules to kWh for better scale on plots if values are small
+    # Or keep as Joules if the numbers are large enough. Let's stick with Joules for now,
+    # as external estimates are in Joules and can be directly compared.
+    # If the numbers are too small to be visible, consider multiplying by a factor
+    # or converting to mJ for external if they are tiny compared to local.
+
+    # Graph 1: Total Carbon Emissions per Step
+    plt.figure(figsize=(12, 7))
+    plt.bar(step_names, total_carbon_gco2, color='skyblue')
+    plt.xlabel("Agent Step")
+    plt.ylabel("Carbon Emissions (gCO2)")
+    plt.title("Carbon Emissions per AI Agent Step")
+    plt.xticks(rotation=45, ha='right') # Rotate labels for better readability
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout() # Adjust layout to prevent labels overlapping
+    plt.savefig("carbon_emissions_per_step.png")
+    # plt.show() # Uncomment to display graph immediately
+
+    # Graph 2: Energy Consumption Breakdown per Step (Stacked Bar Chart)
+    # Create a DataFrame for easier plotting with stacked bars
+    df_energy = pd.DataFrame({
+        'CPU': cpu_joules,
+        'GPU': gpu_joules,
+        'External': external_joules
+    }, index=step_names)
+
+    # Convert Joules to mJ (millijoules) if values are very small for better visibility
+    # Or to kJ if they are large
+    # Let's check the maximum value to decide scale
+    max_energy_joules = max(max(cpu_joules), max(gpu_joules), max(external_joules))
+    energy_unit = "Joules (J)"
+    scale_factor = 1.0
+    if max_energy_joules < 1.0 and max_energy_joules > 0:
+        energy_unit = "MilliJoules (mJ)"
+        scale_factor = 1000.0
+    elif max_energy_joules >= 1000.0:
+        energy_unit = "KiloJoules (kJ)"
+        scale_factor = 1/1000.0
+
+    df_energy_scaled = df_energy * scale_factor
+
+    ax = df_energy_scaled.plot(kind='bar', stacked=True, figsize=(14, 8), color=['lightcoral', 'lightgreen', 'lightskyblue'])
+    plt.xlabel("Agent Step")
+    plt.ylabel(f"Energy Consumption ({energy_unit})")
+    plt.title("Energy Consumption Breakdown per AI Agent Step")
+    plt.xticks(rotation=45, ha='right')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.legend(title="Energy Source")
+
+    # Add total values on top of stacked bars (optional, but nice)
+    for c in ax.containers:
+        labels = [f'{v.get_height():.2f}' if v.get_height() > 0 else '' for v in c]
+        ax.bar_label(c, labels=labels, label_type='center', fontsize=7, color='black') # center for stacked, edge for single
+
+    plt.tight_layout()
+    plt.savefig("energy_breakdown_per_step.png")
+    plt.show() # Show both graphs
+
+    print("\nGraphs saved as 'carbon_emissions_per_step.png' and 'energy_breakdown_per_step.png'")
+
 
 if __name__ == "__main__":
     run_ai_agent_simulation_with_llm()
