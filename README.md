@@ -1,8 +1,4 @@
-Absolutely — here's a cleaned-up, professional, and **actionable `README.md`** based on your repo layout, the command line workflow you shared, and the intent of your tool:
-
----
-
-# 🌿 FOSS Energy Tracker
+# 🌿 Agent Green
 
 **Track and estimate the carbon footprint of AI agents, local compute, and LLM API calls in real time.**
 
