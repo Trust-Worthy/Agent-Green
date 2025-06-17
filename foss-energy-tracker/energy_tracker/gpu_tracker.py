@@ -65,3 +65,50 @@ class GPUTracker:
 
     def get_total_energy_joules(self):
         return self._gpu_energy_joules
+    def poll_energy_since_last_call(self):
+        if self._last_cpu_times is None: # Not started or already stopped
+            return 0.0
+
+        current_cpu_times = psutil.cpu_times()
+        current_time = time.time()
+
+        # Calculate CPU time differences
+        user_diff = current_cpu_times.user - self._last_cpu_times.user
+        system_diff = current_cpu_times.system - self._last_cpu_times.system
+        # Consider other fields like `idle` or `iowait` if relevant for more accuracy
+
+        cpu_time_delta = user_diff + system_diff # Total active CPU time
+        time_delta = current_time - self._last_poll_time
+
+        # If time_delta is zero, or no active CPU time, return 0
+        if time_delta == 0 or cpu_time_delta == 0:
+            energy_for_interval = 0.0
+        else:
+            # Simple approximation: power = (CPU_utilization / 100) * TDP
+            # More accurately, you'd need actual power sensors or better models.
+            # Assuming average CPU power (e.g., 50W) for demonstration purposes.
+            # This is a very rough estimate without actual TDP or power sensors.
+            AVG_CPU_POWER_WATTS = 50.0 # This is a placeholder! Research your actual CPU's TDP or average power.
+            
+            # CPU utilization is total CPU time divided by total elapsed time
+            # For this simplified model, we'll just use a direct scaling.
+            # A more accurate model would involve actual utilization percentages.
+            
+            # Let's simplify: assume constant power when CPU is "active" for the delta.
+            # A common (but crude) way is to consider average power * time delta
+            # or try to estimate based on active time.
+            # For a quick MVP, let's use percentage of time active over the interval.
+            cpu_utilization_percentage = (cpu_time_delta / time_delta) * 100 if time_delta > 0 else 0
+            
+            # Energy (Joules) = Power (Watts) * Time (Seconds)
+            # If we assume 50W is for 100% utilization, then scale it.
+            # This is still a very coarse estimation for actual CPU energy.
+            energy_for_interval = (cpu_utilization_percentage / 100.0) * AVG_CPU_POWER_WATTS * time_delta
+
+
+        # Update for next poll
+        self._last_cpu_times = current_cpu_times
+        self._last_poll_time = current_time
+        
+        # self._total_joules += energy_for_interval # No, total is accumulated by main tracker
+        return energy_for_interval
