@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import random
 
 # Assume foss_energy_tracker is installed and available
-from energy_tracker import EnergyTracker, CarbonEstimator # Your library!
+from energy_tracker import EnergyTracker, CarbonEstimator 
 
 # --- Configuration ---
 NUM_SAMPLES = 50000
